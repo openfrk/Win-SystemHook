@@ -19,3 +19,4 @@ SystemHook is a lightweight, command-line utility for Windows that extracts icon
 ## Compilation [OTHER]
 
 If you have MinGW installed, it is highly recommended to use it for compilation as it is the standard toolchain for this project.
+[NOTE: THIS PROGRAM IS COMMAND-LINE ONLY. IN CMD/POWERSHELL, PLEASE WRITE "SystemHook".]
