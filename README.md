@@ -9,6 +9,7 @@ SystemHook is a lightweight, command-line utility for Windows that extracts icon
 - Convert extracted PNG icons into Base64 HTML image tags.
 - Launch Windows applications or custom executables directly via the command line.
 - Single-file executable with embedded resources (icon and PowerShell script).
+- Generate "GodMode" shortcuts (system CLSIDs, MS-Settings, URL Protocols) with detailed CSV statistics.
 
 ## Prerequisites
 
@@ -20,3 +21,10 @@ SystemHook is a lightweight, command-line utility for Windows that extracts icon
 
 If you have MinGW installed, it is highly recommended to use it for compilation as it is the standard toolchain for this project.
 [NOTE: THIS PROGRAM IS COMMAND-LINE ONLY. IN CMD/POWERSHELL, PLEASE WRITE "SystemHook".]
+
+## GodMode Feature
+
+Extracts system shortcuts (CLSIDs, MS-Settings, URL Protocols), creates a dedicated folder with a custom icon, and saves detailed CSV statistics.
+
+```cmd
+SystemHook.exe run --GodMode "<Output_Directory>"
