@@ -1,0 +1,5 @@
+// App Icon
+1 ICON "frk.ico"
+
+// Embedded PowerShell Script for Base64 conversion
+POWERSHELL_SCRIPT RCDATA "Base64Converter.ps1"
