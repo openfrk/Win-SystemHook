@@ -26,5 +26,7 @@ If you have MinGW installed, it is highly recommended to use it for compilation 
 
 Extracts system shortcuts (CLSIDs, MS-Settings, URL Protocols), creates a dedicated folder with a custom icon, and saves detailed CSV statistics.
 
+[NOTE2: YOU INSTALLED THE Win-SystemHook? PLEASE RUN THIS COMMAND IN CMD (BUT ADMINISTRATOR); setx PATH "%PATH%;C:\Program Files (x86)\SystemHook" /M]
+
 ```cmd
 SystemHook.exe run --GodMode "<Output_Directory>"
