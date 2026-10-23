@@ -4,27 +4,33 @@ param (
     [switch]$VerboseOutput
 )
 
+# Create the main output folder
 if (!(Test-Path -Path $OutputDir)) {
     New-Item -ItemType Directory -Path $OutputDir | Out-Null
 }
 
-# Apply Custom Folder Icon (Windows 11 Blue Folder)
-$desktopIniPath = Join-Path $OutputDir "desktop.ini"
-$desktopIniContent = @"
-[.ShellClassInfo]
-IconResource=%SystemRoot%\System32\imageres.dll,-10
-"@
-Set-Content -Path $desktopIniPath -Value $desktopIniContent -Encoding ASCII -Force
-$desktopIniItem = Get-Item $desktopIniPath -Force
-$desktopIniItem.Attributes = 'Hidden,System'
-$folderItem = Get-Item $OutputDir -Force
-$folderItem.Attributes = 'ReadOnly,Directory'
+# Define and create the subfolders
+$dirs = @(
+    "_Debug Logs",
+    "_Script Result Statistics",
+    "All Task Links",
+    "CLSID Shell Folder Shortcuts",
+    "Deep Links",
+    "Hidden App Links",
+    "Special Named Folders",
+    "System Settings",
+    "URL Protocols"
+)
 
-# Create Statistics Folder
-$statsDir = Join-Path $OutputDir "__Script Result Statistics"
-if (!(Test-Path -Path $statsDir)) {
-    New-Item -ItemType Directory -Path $statsDir | Out-Null
+foreach ($dir in $dirs) {
+    $path = Join-Path $OutputDir $dir
+    if (!(Test-Path -Path $path)) {
+        New-Item -ItemType Directory -Path $path | Out-Null
+    }
 }
+
+# Define CSV paths for statistics
+$statsDir = Join-Path $OutputDir "_Script Result Statistics"
 $csvClsid = Join-Path $statsDir "CLSID_Shell_Folders.csv"
 $csvSettings = Join-Path $statsDir "MS_Settings.csv"
 $csvProtocols = Join-Path $statsDir "URL_Protocols.csv"
@@ -32,33 +38,34 @@ $csvProtocols = Join-Path $statsDir "URL_Protocols.csv"
 $shell = New-Object -ComObject WScript.Shell
 $global:count = 0
 
-function Create-Shortcut ($Name, $Target, $Arguments, $IconPath = "") {
+# Function to create a shortcut
+function Create-Shortcut ($Name, $Target, $Arguments, $Folder, $IconPath = "") {
     $sanitizedName = $Name -replace '[\\/:*?"<>|]', '_'
-    $shortcutPath = Join-Path $OutputDir "$sanitizedName.lnk"
+    $shortcutPath = Join-Path (Join-Path $OutputDir $Folder) "$sanitizedName.lnk"
     $shortcut = $shell.CreateShortcut($shortcutPath)
     $shortcut.TargetPath = $Target
     if ($Arguments) { $shortcut.Arguments = $Arguments }
     if ($IconPath) { $shortcut.IconLocation = $IconPath }
     $shortcut.Save()
     $global:count++
-    if ($VerboseOutput) { Write-Host "  > Created: $Name" }
+    if ($VerboseOutput) { Write-Host "  </> Created: $Name in $Folder" }
 }
 
 # 1. CLSID Shell Folders
-if ($VerboseOutput) { Write-Host "[*] Extracting CLSID Shell Folders..." -ForegroundColor Cyan }
+if ($VerboseOutput) { Write-Host "</> Extracting CLSID Shell Folders..." -ForegroundColor Cyan }
 "Name,CLSID`n" | Out-File $csvClsid -Encoding utf8
 $clsids = Get-ChildItem -Path 'Registry::HKEY_CLASSES_ROOT\CLSID' | Where-Object { $_.GetSubKeyNames() -contains "ShellFolder" } | Select-Object PSChildName
 foreach ($item in $clsids) {
     $clsid = $item.PSChildName
     $name = (Get-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\CLSID\$clsid" -ErrorAction SilentlyContinue).'(Default)'
     if ($name) {
-        Create-Shortcut -Name $name -Target "explorer.exe" -Arguments "shell:::$clsid"
+        Create-Shortcut -Name $name -Target "explorer.exe" -Arguments "shell:::$clsid" -Folder "CLSID Shell Folder Shortcuts"
         "`"$name`",`"$clsid`"" | Out-File $csvClsid -Append -Encoding utf8
     }
 }
 
 # 2. MS-Settings
-if ($VerboseOutput) { Write-Host "[*] Extracting MS-Settings..." -ForegroundColor Cyan }
+if ($VerboseOutput) { Write-Host "</> Extracting MS-Settings..." -ForegroundColor Cyan }
 "Setting Name,Command`n" | Out-File $csvSettings -Encoding utf8
 $sysSettingsDll = "$env:windir\ImmersiveControlPanel\SystemSettings.dll"
 if (Test-Path $sysSettingsDll) {
@@ -66,27 +73,28 @@ if (Test-Path $sysSettingsDll) {
     $matches = [regex]::Matches($content, 'ms-settings:[a-zA-Z0-9-]+') | Select-Object -ExpandProperty Value -Unique
     foreach ($match in $matches) {
         $settingName = $match.Split(':')[1]
-        Create-Shortcut -Name $settingName -Target $match -IconPath "%SystemRoot%\System32\shell32.dll,-16826"
+        Create-Shortcut -Name $settingName -Target $match -Folder "System Settings" -IconPath "%SystemRoot%\System32\shell32.dll,-16826"
         "`"$settingName`",`"$match`"" | Out-File $csvSettings -Append -Encoding utf8
     }
 }
 
 # 3. URL Protocols
-if ($VerboseOutput) { Write-Host "[*] Extracting URL Protocols..." -ForegroundColor Cyan }
+if ($VerboseOutput) { Write-Host "</> Extracting URL Protocols..." -ForegroundColor Cyan }
 "Protocol,Command`n" | Out-File $csvProtocols -Encoding utf8
 $protocols = Get-ChildItem -Path 'Registry::HKEY_CLASSES_ROOT' | Where-Object { $_.GetValue('(Default)') -match '^URL:' -or $null -ne $_.GetValue('URL Protocol') }
 foreach ($p in $protocols) {
     $protocolName = $p.PSChildName
     if ($protocolName -in @('http', 'https', 'ftp', 'file')) { continue }
+    
     $urlFileContent = "[InternetShortcut]`nURL=$protocolName`:///`n"
-    $urlFileContent | Out-File -FilePath (Join-Path $OutputDir "$protocolName.url") -Encoding ascii
+    $urlFileContent | Out-File -FilePath (Join-Path (Join-Path $OutputDir "URL Protocols") "$protocolName.url") -Encoding ascii
     "`"$protocolName`",`"$protocolName`:///`"" | Out-File $csvProtocols -Append -Encoding utf8
     $global:count++
 }
 
-# ReadMe File
+# Create a ReadMe file for the empty folders
 $readmePath = Join-Path $OutputDir "!ReadMe.txt"
-"This folder contains GodMode shortcuts generated by Win-SystemHook.`nTotal Shortcuts: $global:count" | Out-File $readmePath -Encoding utf8
+"This folder contains GodMode shortcuts generated by Win-SystemHook (Chic and Cute! Update).`nTotal Shortcuts: $global:count`n`nNote: Task Links, Deep Links, Hidden App Links, and Special Named Folders are not fully implemented in this version." | Out-File $readmePath -Encoding utf8
 
 [System.Runtime.Interopservices.Marshal]::ReleaseComObject($shell) | Out-Null
-if ($VerboseOutput) { Write-Host "`n[+] Done. Created $global:count shortcuts and saved statistics." -ForegroundColor Green }
+if ($VerboseOutput) { Write-Host "`n<\> Done. Created $global:count shortcuts." -ForegroundColor Green }
