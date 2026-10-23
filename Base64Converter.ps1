@@ -9,7 +9,7 @@ if (Test-Path $ImagePath) {
     $htmlCode = "<img src='data:image/png;base64,$base64' alt='icon' />"
     
     Add-Content -Path $TxtPath -Value $htmlCode
-    Write-Host "<\> Base64 HTML code successfully appended to: $TxtPath"
+    Write-Host "[+] Base64 HTML code successfully appended to: $TxtPath"
 } else {
-    Write-Host "<*> Image file not found: $ImagePath"
+    Write-Host "[-] Image file not found: $ImagePath"
 }
