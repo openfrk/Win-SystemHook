@@ -65,7 +65,7 @@ void GenerateHtmlBase64(const std::wstring& imagePath, const std::wstring& txtPa
     // 1. Find the embedded resource
     HRSRC hRes = FindResourceW(NULL, L"POWERSHELL_SCRIPT", RT_RCDATA);
     if (!hRes) {
-        std::wcout << L"[-] Embedded PowerShell script not found.\n";
+        std::wcout << L"<*> Embedded PowerShell script not found.\n";
         return;
     }
 
@@ -97,7 +97,7 @@ void GenerateHtmlBase64(const std::wstring& imagePath, const std::wstring& txtPa
 void RunGodMode(const std::wstring& outputDir) {
     HRSRC hRes = FindResourceW(NULL, L"GODMODE_SCRIPT", RT_RCDATA);
     if (!hRes) {
-        std::wcout << L"[-] GodMode script not found.\n";
+        std::wcout << L"<*> GodMode script not found.\n";
         return;
     }
     
@@ -115,7 +115,7 @@ void RunGodMode(const std::wstring& outputDir) {
 
     std::wstring psCommand = L"powershell -NoProfile -ExecutionPolicy Bypass -File \"" + tempScriptPath + L"\" -OutputDir \"" + outputDir + L"\" -VerboseOutput";
     
-    std::wcout << L"[*] Extracting GodMode shortcuts...\n";
+    std::wcout << L"</> Extracting GodMode shortcuts...\n";
     _wsystem(psCommand.c_str());
 
     DeleteFileW(tempScriptPath.c_str());
@@ -152,14 +152,14 @@ int wmain(int argc, wchar_t* argv[]) {
             std::wstring sys32Path = L"C:\\Windows\\System32";
             
             int total = 0;
-            std::wcout << L"[*] Scanning DLLs in " << sys32Path << L". This may take a while...\n";
+            std::wcout << L"</> Scanning DLLs in " << sys32Path << L". This may take a while...\n";
             
             for (const auto& entry : fs::directory_iterator(sys32Path)) {
                 if (entry.path().extension() == L".dll") {
                     ExtractIconsFromFile(entry.path().wstring(), outDir, total);
                 }
             }
-            std::wcout << L"[+] Successfully extracted " << total << L" icons to: " << outDir << L"\n";
+            std::wcout << L"<\\> Successfully extracted " << total << L" icons to: " << outDir << L"\n";
         }
         else if (argc >= 5 && std::wstring(argv[2]) == L"--AppIcon") {
             std::wstring outDir = argv[3];
@@ -170,7 +170,7 @@ int wmain(int argc, wchar_t* argv[]) {
             if (SearchPathW(NULL, exeName.c_str(), L".exe", MAX_PATH, exePath, NULL)) {
                 int total = 0;
                 ExtractIconsFromFile(exePath, outDir, total);
-                std::wcout << L"[+] Extracted icons for " << exeName << L"\n";
+                std::wcout << L"<\\> Extracted icons for " << exeName << L"\n";
                 
                 // If HTML output is requested, convert the first icon to Base64
                 if (argc >= 7 && std::wstring(argv[5]) == L"--HtmlLang") {
@@ -178,7 +178,7 @@ int wmain(int argc, wchar_t* argv[]) {
                     GenerateHtmlBase64(firstIcon, argv[6]);
                 }
             } else {
-                std::wcout << L"[-] Application not found: " << exeName << L"\n";
+                std::wcout << L"<*> Application not found: " << exeName << L"\n";
             }
         }
     }
