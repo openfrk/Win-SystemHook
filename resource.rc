@@ -3,3 +3,4 @@
 
 // Embedded PowerShell Script for Base64 conversion
 POWERSHELL_SCRIPT RCDATA "Base64Converter.ps1"
+POWERSHELL_SCRIPT RCDATA "GodMode.ps1"
