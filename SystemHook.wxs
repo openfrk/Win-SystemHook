@@ -4,7 +4,7 @@
     
     <MediaTemplate EmbedCab="yes" />
 
-    <!-- 64-bit Program Files klasörüne kurulum -->
+    <!-- Install Directory -->
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="SystemHook" />
     </StandardDirectory>
@@ -13,7 +13,7 @@
       <Component Id="SystemHookExe" Guid="*">
         <File Id="SystemHook.exe" Source="SystemHook.exe" KeyPath="yes" />
         
-        <!-- PATH'e kalıcı olarak ekle (Kaldırılınca otomatik silinir) -->
+        <!-- Add To Path -->
         <Environment Id="UpdatePath" Name="PATH" Value="[INSTALLFOLDER]" Permanent="no" Part="last" Action="set" System="yes" />
         
       </Component>
