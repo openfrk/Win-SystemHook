@@ -27,6 +27,3 @@ If you have MinGW installed, it is highly recommended to use it for compilation 
 Extracts system shortcuts (CLSIDs, MS-Settings, URL Protocols), creates a dedicated folder with a custom icon, and saves detailed CSV statistics.
 
 **Note for before v1.1.1 MSI Users:** If you installed via the MSI, the executable is located at `C:\Program Files (x86)\SystemHook\SystemHook.exe`. You can either add this folder to your PATH manually or run the tool using its full path.
-
-```cmd
-SystemHook.exe run --GodMode "<Output_Directory>"
