@@ -63,7 +63,7 @@ void ExtractIconsFromFile(const std::wstring& filePath, const std::wstring& outp
 // Extract the embedded PowerShell script from the EXE, run it, and delete it
 void GenerateHtmlBase64(const std::wstring& imagePath, const std::wstring& txtPath) {
     // 1. Find the embedded resource
-    HRSRC hRes = FindResourceW(NULL, L"POWERSHELL_SCRIPT", RT_RCDATA);
+HRSRC hRes = FindResourceW(GetModuleHandleW(NULL), MAKEINTRESOURCEW(2), MAKEINTRESOURCEW(10));
     if (!hRes) {
         std::wcout << L"<*> Embedded PowerShell script not found.\n";
         return;
@@ -95,7 +95,7 @@ void GenerateHtmlBase64(const std::wstring& imagePath, const std::wstring& txtPa
 
 // Function to execute the embedded GodMode PowerShell script
 void RunGodMode(const std::wstring& outputDir) {
-    HRSRC hRes = FindResourceW(NULL, L"GODMODE_SCRIPT", RT_RCDATA);
+HRSRC hRes = FindResourceW(GetModuleHandleW(NULL), MAKEINTRESOURCEW(3), MAKEINTRESOURCEW(10));
     if (!hRes) {
         std::wcout << L"<*> GodMode script not found.\n";
         return;
